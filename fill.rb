@@ -52,7 +52,7 @@ def fillDatabaseWithCSV(fileName)
             #
             # TODO find a better way to do this
             
-            if (nbrSentences.modulo 1000).equal? 0
+            if (nbrSentences.modulo 10000).equal? 0
                 Neo4j::Transaction.new
             end
             tempSentence = Sentence.new
@@ -61,7 +61,7 @@ def fillDatabaseWithCSV(fileName)
             tempSentence.sentenceId = columns.first[1..-2]
             
             
-            if (nbrSentences.modulo 1000).equal? 999
+            if (nbrSentences.modulo 10000).equal? 9999
                 Neo4j::Transaction.finish
             end
             nbrSentences += 1
@@ -69,10 +69,56 @@ def fillDatabaseWithCSV(fileName)
     end
 end
 
+def fillLinks(linksFileName)
+    nbrLinks = 0;
+    tempLink = nil;
+
+     
+
+    File.open(linksFileName).each_line do |line|
+
+    columns = line.split('";"')
+
+        if !columns.empty?
+            if (nbrLinks.modulo 10000).equal? 0
+                Neo4j::Transaction.new
+            end
+            transaction = nil;
+            sourceId = columns.first[1..-1]
+            targetId = columns.last[0..-4]
+            if sourceId == targetId
+                next
+            end 
+
+            puts "#{sourceId} - #{targetId}"
+            sourceResults = Sentence.find(:sentenceId => sourceId)
+            if ! sourceResults.empty?
+                sourceSentence = sourceResults[0]
+                targetResults = Sentence.find(:sentenceId => targetId)
+                if ! targetResults.empty?
+                   targetSentence = targetResults[0]
+                   if ! targetSentence.nil?
+                        sourceSentence.translated_by.new(targetSentence)
+                    end
+                end 
+            
+            end
+            if (nbrLinks.modulo 10000).equal? 9999
+                Neo4j::Transaction.finish
+            end
+            
+            nbrLinks += 1
+        end
+    end
+end
+
+
 if __FILE__ == $0
     Neo4j.start
     fileName = 'sentences_20100111.csv'
     fillDatabaseWithCSV(fileName)
+    fileName = 'links_20100111.csv'
+    fillLinks(fileName)
     Neo4j.stop
 end
 

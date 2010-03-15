@@ -1,0 +1,16 @@
+This is an attempt to port some basic functionnalities of Tatoeba project
+(http://tatoeba.org) from PHP+mysql to ruby+neo4j
+
+=== Requirements 
+
+It uses neo4j binding from Andreas Ronge http://github.com/andreasronge/neo4j
+
+It has been tested with jruby1.4
+
+=== Licence
+MIT, see http://github.com/sysko/Taoeberyl/blob/master/LICENSE
+
+=== Usage
+
+First run fill.rb, it will populate the database, the you can use
+find_sentences.rb to do some research in the database
